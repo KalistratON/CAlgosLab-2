@@ -122,7 +122,7 @@ void DoIterator (const std::vector<T>& theVec)
 
     {
         size_t i = 0;
-        typename Array<T>::Iterator anIt = anArr.iterator();
+        auto anIt = anArr.iterator();
         while (anIt.hasNext()) {
             EXPECT_TRUE (anIt.get() == theVec[i]);
             anIt.next();
@@ -132,7 +132,7 @@ void DoIterator (const std::vector<T>& theVec)
     }
 
     {
-        typename Array<T>::Iterator anIt = anArr.iterator();
+        auto anIt = anArr.iterator();
         for (auto aVecIt = theVec.rbegin(); aVecIt != theVec.rend(); ++aVecIt) {
             anIt.set (*aVecIt);
             anIt.next();
@@ -140,7 +140,7 @@ void DoIterator (const std::vector<T>& theVec)
     }
 
     {
-        typename Array<T>::Iterator anIt = anArr.reverseIterator();
+        auto anIt = anArr.reverseIterator();
         for (auto aVecIt = theVec.begin(); aVecIt != theVec.end(); ++aVecIt) {
             EXPECT_TRUE (anIt.get() == *aVecIt);
             anIt.next();

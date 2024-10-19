@@ -18,9 +18,11 @@ private:
     const double memoryExtent = 1.8;
 
 public:
-    class Iterator {
+
+    template <bool IsDirect>
+    class Iterator_ {
     public:
-        Iterator (Array<T>& theArray, bool TheIsDirect);
+        Iterator_ (Array<T>& theArray);
 
         const T& get() const;
         void set (const T& theValue);
@@ -33,7 +35,11 @@ public:
         bool myIsDirect;
     };
 
-    using ConstIterator = const typename Iterator;
+    using Iterator              = Iterator_<true>;
+    using ConstIterator         = const Iterator_<true>;
+    using ReverseIterator       = Iterator_<false>;
+    using ConstReverseIterator  = const Iterator_<false>;
+
 
     Array();
     explicit Array (int theCapacity);
@@ -54,11 +60,11 @@ public:
 
     int size() const;
 
-    Iterator iterator() { return Iterator (*this, true); };
-    ConstIterator iterator() const { return ConstIterator (*this, true); };
+    Iterator iterator() { return Iterator (*this); };
+    ConstIterator iterator() const { return ConstIterator (*this); };
 
-    Iterator reverseIterator() { return Iterator (*this, false); };
-    ConstIterator reverseIterator() const { return ConstIterator (*this, false); };
+    ConstReverseIterator reverseIterator() { return ReverseIterator (*this); };
+    ConstReverseIterator reverseIterator() const { return ConstReverseIterator (*this); };
 
 private:
 
@@ -194,34 +200,41 @@ int Array<T>::size() const
 }
 
 template<typename T>
-Array<T>::Iterator::Iterator (Array<T>& theArray, bool TheIsDirect)
-    : myArray (theArray), myCurrentIndex (0), myIsDirect (TheIsDirect)
+template<bool IsDirect>
+Array<T>::Iterator_<IsDirect>::Iterator_ (Array<T>& theArray)
+    : myArray (theArray), myCurrentIndex (0)
 {
-    if (!myIsDirect) myCurrentIndex = myArray.size() - 1;
+    if (!IsDirect) {
+        myCurrentIndex = myArray.size() - 1;
+    }
 }
 
 template<typename T>
-const T& Array<T>::Iterator::get() const
+template<bool IsDirect>
+const T& Array<T>::Iterator_<IsDirect>::get() const
 {
     return myArray.myArr[myCurrentIndex];
 }
 
 template<typename T>
-void Array<T>::Iterator::set (const T& theValue)
+template<bool IsDirect>
+void Array<T>::Iterator_<IsDirect>::set (const T& theValue)
 {
     myArray[myCurrentIndex] = theValue;
 }
 
 template<typename T>
-void Array<T>::Iterator::next()
+template<bool IsDirect>
+void Array<T>::Iterator_<IsDirect>::next()
 {
-    myIsDirect ? ++myCurrentIndex : --myCurrentIndex;
+    IsDirect ? ++myCurrentIndex : --myCurrentIndex;
 }
 
 template<typename T>
-bool Array<T>::Iterator::hasNext() const
+template<bool IsDirect>
+bool Array<T>::Iterator_<IsDirect>::hasNext() const
 {
-    return myIsDirect ? myCurrentIndex < myArray.size() : myCurrentIndex >= 0;
+    return IsDirect ? myCurrentIndex < myArray.size() : myCurrentIndex >= 0;
 }
 
 };
