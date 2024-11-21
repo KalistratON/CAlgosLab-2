@@ -35,10 +35,25 @@ public:
         bool myIsDirect;
     };
 
+    template <bool IsDirect>
+    class ConstIterator_ {
+    public:
+        ConstIterator_ (const Array<T>& theArray);
+
+        const T& get() const;
+        void next();
+        bool hasNext() const;
+
+    private:
+        const Array<T>& myArray;
+        int myCurrentIndex;
+        bool myIsDirect;
+    };
+
     using Iterator              = Iterator_<true>;
-    using ConstIterator         = const Iterator_<true>;
+    using ConstIterator         = ConstIterator_<true>;
     using ReverseIterator       = Iterator_<false>;
-    using ConstReverseIterator  = const Iterator_<false>;
+    using ConstReverseIterator  = ConstIterator_<false>;
 
 
     Array();
@@ -63,7 +78,7 @@ public:
     Iterator iterator() { return Iterator (*this); };
     ConstIterator iterator() const { return ConstIterator (*this); };
 
-    ConstReverseIterator reverseIterator() { return ReverseIterator (*this); };
+    ReverseIterator reverseIterator() { return ReverseIterator (*this); };
     ConstReverseIterator reverseIterator() const { return ConstReverseIterator (*this); };
 
 private:
@@ -128,6 +143,9 @@ template<typename T>
 Array<T>::~Array()
 {
     if (myArr) {
+        for (size_t i = 0; i < mySize; ++i) {
+            myArr[i].~T();
+        }
         free (myArr);
     }
 }
@@ -233,6 +251,37 @@ void Array<T>::Iterator_<IsDirect>::next()
 template<typename T>
 template<bool IsDirect>
 bool Array<T>::Iterator_<IsDirect>::hasNext() const
+{
+    return IsDirect ? myCurrentIndex < myArray.size() : myCurrentIndex >= 0;
+}
+
+template<typename T>
+template<bool IsDirect>
+Array<T>::ConstIterator_<IsDirect>::ConstIterator_ (const Array<T>& theArray)
+    : myArray (theArray), myCurrentIndex (0)
+{
+    if (!IsDirect) {
+        myCurrentIndex = myArray.size() - 1;
+    }
+}
+
+template<typename T>
+template<bool IsDirect>
+const T& Array<T>::ConstIterator_<IsDirect>::get() const
+{
+    return myArray.myArr[myCurrentIndex];
+}
+
+template<typename T>
+template<bool IsDirect>
+void Array<T>::ConstIterator_<IsDirect>::next()
+{
+    IsDirect ? ++myCurrentIndex : --myCurrentIndex;
+}
+
+template<typename T>
+template<bool IsDirect>
+bool Array<T>::ConstIterator_<IsDirect>::hasNext() const
 {
     return IsDirect ? myCurrentIndex < myArray.size() : myCurrentIndex >= 0;
 }
